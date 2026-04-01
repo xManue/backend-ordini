@@ -1,0 +1,6 @@
+C:\Users\manue\Desktop\ProgettoMC\Backend.API\wwwroot\kitchen.html
+C:\Users\manue\Desktop\ProgettoMC\Backend.API\wwwroot\index.html
+C:\Users\manue\Desktop\ProgettoMC\Backend.API\wwwroot\dashboard.html
+wwwroot\dashboard.html
+wwwroot\index.html
+wwwroot\kitchen.html

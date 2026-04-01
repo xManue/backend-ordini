@@ -1,0 +1,332 @@
+[
+  {
+    "ContainingType": "Backend.API.Controllers.OrdersController",
+    "Method": "CancelOrder",
+    "RelativePath": "api/Orders/{id}/cancel",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [],
+    "EndpointName": "CancelOrder"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.OrdersController",
+    "Method": "CompleteOrder",
+    "RelativePath": "api/Orders/{id}/Completed",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [],
+    "EndpointName": "CompleteOrder"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.OrdersController",
+    "Method": "GetOrder",
+    "RelativePath": "api/Orders/{id}/getbyid",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Core.Models.OrderModel",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "GetOrderByID"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.OrdersController",
+    "Method": "PayOrder",
+    "RelativePath": "api/Orders/{id}/pay",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [],
+    "EndpointName": "PayOrder"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.OrdersController",
+    "Method": "PreparingOrder",
+    "RelativePath": "api/Orders/{id}/Preparing",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [],
+    "EndpointName": "PreparingOrder"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.OrdersController",
+    "Method": "ReadyOrder",
+    "RelativePath": "api/Orders/{id}/Ready",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [],
+    "EndpointName": "ReadyOrder"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.OrdersController",
+    "Method": "CreateOrder",
+    "RelativePath": "api/Orders/createorder",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderDto",
+        "Type": "Backend.Core.Models.OrderDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Core.Models.OrderModel",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "CreateOrder"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.OrdersController",
+    "Method": "GetAllOrders",
+    "RelativePath": "api/Orders/getorders",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "stato",
+        "Type": "System.Nullable\u00601[[Backend.Core.Models.OrderStatus, Backend.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[Backend.Core.Models.OrderModel, Backend.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "GetAllOrders"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.ProductsController",
+    "Method": "InsertProduct",
+    "RelativePath": "api/Products",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "product",
+        "Type": "Backend.Core.Models.ProductDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Core.Models.ProductModel",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "InsertProduct"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.ProductsController",
+    "Method": "UpdateProduct",
+    "RelativePath": "api/Products",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "product",
+        "Type": "Backend.Core.Models.ProductDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [],
+    "EndpointName": "UpdateProduct"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.ProductsController",
+    "Method": "DeleteProduct",
+    "RelativePath": "api/Products/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [],
+    "EndpointName": "DeleteProduct"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.ProductsController",
+    "Method": "AvailabilityProduct",
+    "RelativePath": "api/Products/{id}/availability",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [],
+    "EndpointName": "ToggleProductAvailability"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.ProductsController",
+    "Method": "GetAllProducts",
+    "RelativePath": "api/Products/GetProducts",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "disponibile",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[Backend.Core.Models.ProductModel, Backend.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "GetAllProducts"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.ProductsController",
+    "Method": "GetProductsByCategory",
+    "RelativePath": "api/Products/GetProductsByCategory",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "category",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[Backend.Core.Models.ProductModel, Backend.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "GetProductsByCategory"
+  },
+  {
+    "ContainingType": "Backend.API.Controllers.ProductsController",
+    "Method": "GetProduct",
+    "RelativePath": "api/Products/GetSingleProduct",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Backend.Core.Models.ProductModel",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "GetProductByID"
+  }
+]

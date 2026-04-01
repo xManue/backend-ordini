@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { color: #333; }
+        .product-card {
+            border: 1px solid #ddd; border-radius: 8px; padding: 16px;
+            margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .product-info h3 { margin: 0 0 4px; }
+        .product-info p { margin: 2px 0; color: #555; }
+        .product-actions { display: flex; align-items: center; gap: 8px; }
+        .product-actions input[type="number"] { width: 60px; padding: 4px; }
+        .product-actions button {
+            padding: 6px 14px; background: #4CAF50; color: #fff;
+            border: none; border-radius: 4px; cursor: pointer;
+        }
+        .product-actions button:hover { background: #45a049; }
+        #order-section { margin-top: 30px; }
+        #order-items { list-style: none; padding: 0; }
+        #order-items li {
+            padding: 6px 0; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        #order-items li button { background: #e53935; color: #fff; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+        #send-order {
+            margin-top: 12px; padding: 10px 24px; background: #1976D2; color: #fff;
+            border: none; border-radius: 4px; cursor: pointer; font-size: 16px;
+        }
+        #send-order:hover { background: #1565C0; }
+        #send-order:disabled { background: #aaa; cursor: default; }
+        #message { margin-top: 12px; font-weight: bold; }
+        .error { color: #e53935; }
+        .success { color: #4CAF50; }
+    </style>
+</head>
+<body>
+
+    <h1>Menu</h1>
+    <div id="products"></div>
+
+    <div id="order-section">
+        <h2>Il tuo ordine</h2>
+        <ul id="order-items"><li><em>Nessun prodotto aggiunto</em></li></ul>
+        <p><strong>Totale: €<span id="order-total">0.00</span></strong></p>
+        <button id="send-order" disabled>Invia ordine</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:5000/api";
+        let cart = []; // { productId, name, quantity, unitPrice }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_BASE}/Products/GetProducts?disponibile=true`);
+                const products = await response.json();
+                const container = document.getElementById("products");
+                container.innerHTML = "";
+
+                products.forEach(p => {
+                    const div = document.createElement("div");
+                    div.className = "product-card";
+                    div.innerHTML = `
+                        <div class="product-info">
+                            <h3>${p.name}</h3>
+                            ${p.description ? `<p>${p.description}</p>` : ""}
+                            ${p.category ? `<p><small>Categoria: ${p.category}</small></p>` : ""}
+                            <p>Prezzo: €${p.price.toFixed(2)}</p>
+                        </div>
+                        <div class="product-actions">
+                            <input type="number" id="qty-${p.id}" min="1" value="1">
+                            <button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">Aggiungi</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Errore nel caricamento prodotti:", error);
+            }
+        }
+
+        function addToCart(productId, name, unitPrice) {
+            const qtyInput = document.getElementById(`qty-${productId}`);
+            const quantity = parseInt(qtyInput.value);
+            if (!quantity || quantity <= 0) return;
+
+            const existing = cart.find(i => i.productId === productId);
+            if (existing) {
+                existing.quantity += quantity;
+            } else {
+                cart.push({ productId, name, quantity, unitPrice });
+            }
+            qtyInput.value = 1;
+            renderCart();
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(i => i.productId !== productId);
+            renderCart();
+        }
+
+        function renderCart() {
+            const list = document.getElementById("order-items");
+            const totalSpan = document.getElementById("order-total");
+            const sendBtn = document.getElementById("send-order");
+
+            if (cart.length === 0) {
+                list.innerHTML = "<li><em>Nessun prodotto aggiunto</em></li>";
+                totalSpan.textContent = "0.00";
+                sendBtn.disabled = true;
+                return;
+            }
+
+            let total = 0;
+            list.innerHTML = "";
+            cart.forEach(item => {
+                const subtotal = item.quantity * item.unitPrice;
+                total += subtotal;
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <span>${item.name} x${item.quantity} — €${subtotal.toFixed(2)}</span>
+                    <button onclick="removeFromCart(${item.productId})">Rimuovi</button>
+                `;
+                list.appendChild(li);
+            });
+
+            totalSpan.textContent = total.toFixed(2);
+            sendBtn.disabled = false;
+        }
+
+        document.getElementById("send-order").addEventListener("click", async () => {
+            const msgDiv = document.getElementById("message");
+            msgDiv.textContent = "";
+
+            const body = {
+                orderItems: cart.map(i => ({ productId: i.productId, quantity: i.quantity }))
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/Orders/createorder`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    const order = await response.json();
+                    msgDiv.className = "success";
+                    msgDiv.textContent = `Ordine #${order.id} creato con successo! Totale: €${order.totalPrice.toFixed(2)}`;
+                    cart = [];
+                    renderCart();
+                } else {
+                    const errorText = await response.text();
+                    msgDiv.className = "error";
+                    msgDiv.textContent = `Errore: ${errorText}`;
+                }
+            } catch (error) {
+                msgDiv.className = "error";
+                msgDiv.textContent = "Errore di connessione al server.";
+                console.error("Errore invio ordine:", error);
+            }
+        });
+
+        loadProducts();
+    </script>
+
+</body>
+</html>
