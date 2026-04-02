@@ -3,16 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\manue\\Desktop\\ProgettoMC\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{30C95E0D-A039-2B54-7539-E8F4FF187070}|Backend.API\\Backend.API.csproj|c:\\users\\manue\\desktop\\progettomc\\backend.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{30C95E0D-A039-2B54-7539-E8F4FF187070}|Backend.API\\Backend.API.csproj|solutionrelative:backend.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{30C95E0D-A039-2B54-7539-E8F4FF187070}|Backend.API\\Backend.API.csproj|c:\\users\\manue\\desktop\\progettomc\\backend.api\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{30C95E0D-A039-2B54-7539-E8F4FF187070}|Backend.API\\Backend.API.csproj|solutionrelative:backend.api\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{30C95E0D-A039-2B54-7539-E8F4FF187070}|Backend.API\\Backend.API.csproj|c:\\users\\manue\\desktop\\progettomc\\backend.api\\wwwroot\\kitchen.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{30C95E0D-A039-2B54-7539-E8F4FF187070}|Backend.API\\Backend.API.csproj|solutionrelative:backend.api\\wwwroot\\kitchen.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{30C95E0D-A039-2B54-7539-E8F4FF187070}|Backend.API\\Backend.API.csproj|c:\\users\\manue\\desktop\\progettomc\\backend.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{30C95E0D-A039-2B54-7539-E8F4FF187070}|Backend.API\\Backend.API.csproj|solutionrelative:backend.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{30C95E0D-A039-2B54-7539-E8F4FF187070}|Backend.API\\Backend.API.csproj|c:\\users\\manue\\desktop\\progettomc\\backend.api\\controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -54,17 +54,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "index.html",
               "DocumentMoniker": "C:\\Users\\manue\\Desktop\\ProgettoMC\\Backend.API\\wwwroot\\index.html",
               "RelativeDocumentMoniker": "Backend.API\\wwwroot\\index.html",
               "ToolTip": "C:\\Users\\manue\\Desktop\\ProgettoMC\\Backend.API\\wwwroot\\index.html",
               "RelativeToolTip": "Backend.API\\wwwroot\\index.html",
-              "ViewState": "AgIAAFABAAAAAAAAAAAAwFoBAAAZAAAAAAAAAA==",
+              "ViewState": "AgIAAFABAAAAAAAAAAAAwFIBAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
               "WhenOpened": "2026-04-01T16:57:59.27Z",
               "EditorCaption": ""
@@ -79,8 +79,7 @@
               "RelativeToolTip": "Backend.Core\\Models\\OrderDTO.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-01T16:57:33.683Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-01T16:57:33.683Z"
             },
             {
               "$type": "Document",
@@ -92,8 +91,7 @@
               "RelativeToolTip": "Backend.Core\\Models\\OrderModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-01T16:57:20.607Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-01T16:57:20.607Z"
             },
             {
               "$type": "Document",
@@ -105,12 +103,11 @@
               "RelativeToolTip": "Backend.API\\Properties\\launchSettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-04-01T16:57:12.145Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-01T16:57:12.145Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "kitchen.html",
               "DocumentMoniker": "C:\\Users\\manue\\Desktop\\ProgettoMC\\Backend.API\\wwwroot\\kitchen.html",
               "RelativeDocumentMoniker": "Backend.API\\wwwroot\\kitchen.html",
@@ -118,8 +115,7 @@
               "RelativeToolTip": "Backend.API\\wwwroot\\kitchen.html",
               "ViewState": "AgIAAJEAAAAAAAAAAAAAwOUAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2026-04-01T16:47:03.627Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-01T16:47:03.627Z"
             },
             {
               "$type": "Document",
@@ -131,8 +127,7 @@
               "RelativeToolTip": "Backend.API\\wwwroot\\dashboard.html",
               "ViewState": "AgIAACEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2026-04-01T16:40:53.527Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-01T16:40:53.527Z"
             },
             {
               "$type": "Document",
@@ -168,18 +163,17 @@
               "RelativeToolTip": "Backend.API\\Controllers\\OrdersController.cs",
               "ViewState": "AgIAAEsAAAAAAAAAAAAWwFMAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-26T11:17:33.063Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-26T11:17:33.063Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\manue\\Desktop\\ProgettoMC\\Backend.API\\Program.cs",
               "RelativeDocumentMoniker": "Backend.API\\Program.cs",
               "ToolTip": "C:\\Users\\manue\\Desktop\\ProgettoMC\\Backend.API\\Program.cs",
               "RelativeToolTip": "Backend.API\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC4AAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAAAAwAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-26T11:12:47.908Z",
               "EditorCaption": ""

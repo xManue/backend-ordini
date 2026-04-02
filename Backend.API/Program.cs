@@ -9,8 +9,8 @@ namespace Backend.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Porta 5225 per rete locale, porta 7157 per Dev Tunnel
-            builder.WebHost.UseUrls("http://0.0.0.0:5225", "https://0.0.0.0:7157");
+            var port = Environment.GetEnvironmentVariable("PORT") ?? "5225";
+            builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
             // Add services to the container.
             builder.Services.AddControllers()
