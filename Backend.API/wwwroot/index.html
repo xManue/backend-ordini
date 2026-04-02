@@ -124,7 +124,7 @@
   </div>
 
   <script>
-    const API_BASE = '/api';
+      const API_BASE = window.location.origin + "/api";
 
     // ── Leggi numero tavolo da URL: ?tavolo=5 ──
     const urlParams = new URLSearchParams(window.location.search);

@@ -32,11 +32,9 @@ namespace Backend.API
 
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            // ✅ Swagger sempre attivo
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             using (var scope = app.Services.CreateScope())
             {
@@ -44,8 +42,10 @@ namespace Backend.API
                 db.Database.EnsureCreated();
             }
 
+            // CORS
             app.UseCors();
 
+            // Frontend (wwwroot)
             app.UseDefaultFiles();
             app.UseStaticFiles();
 

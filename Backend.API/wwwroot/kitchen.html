@@ -82,7 +82,7 @@
   </main>
 
   <script>
-    const API_BASE = '/api/Orders';
+      const API_BASE = window.location.origin + "/api";
     let orders = [];
 
     async function fetchOrders() {
