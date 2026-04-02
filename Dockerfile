@@ -3,7 +3,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 COPY . ./
-RUN dotnet restore
+
+RUN dotnet restore Backend.API/Backend.API.csproj
 RUN dotnet publish Backend.API/Backend.API.csproj -c Release -o out
 
 # Runtime stage
