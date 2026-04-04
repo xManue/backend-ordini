@@ -154,6 +154,6 @@ C:\Users\manue\Desktop\ProgettoMC\Backend.API\obj\Debug\net10.0\Backend.API.genr
 C:\Users\manue\Desktop\ProgettoMC\Backend.API\obj\Debug\net10.0\ref\Backend.API.dll
 C:\Users\manue\Desktop\ProgettoMC\Backend.API\bin\Debug\net10.0\Backend.API.staticwebassets.runtime.json
 C:\Users\manue\Desktop\ProgettoMC\Backend.API\obj\Debug\net10.0\Backend.API.sourcelink.json
-C:\Users\manue\Desktop\ProgettoMC\Backend.API\obj\Debug\net10.0\compressed\9qbbveo733-{0}-ntdd3xadsg-ntdd3xadsg.gz
-C:\Users\manue\Desktop\ProgettoMC\Backend.API\obj\Debug\net10.0\compressed\lvn2q5qcpm-{0}-18lryi2ctl-18lryi2ctl.gz
 C:\Users\manue\Desktop\ProgettoMC\Backend.API\obj\Debug\net10.0\compressed\3bshxa30ka-{0}-b5hninhe47-b5hninhe47.gz
+C:\Users\manue\Desktop\ProgettoMC\Backend.API\obj\Debug\net10.0\compressed\lvn2q5qcpm-{0}-ijfrcara50-ijfrcara50.gz
+C:\Users\manue\Desktop\ProgettoMC\Backend.API\obj\Debug\net10.0\compressed\9qbbveo733-{0}-jz1v3c66wd-jz1v3c66wd.gz

@@ -49,12 +49,20 @@ namespace Backend.API.Middleware
             if (method == "GET" && lower.Contains("/api/products/getproductsbycategory"))
                 return true;
 
+            // Client can verify their table token
+            if (method == "GET" && lower.Contains("/api/tables/verify/"))
+                return true;
+
             // Client can create an order
             if (method == "POST" && lower.Contains("/api/orders/createorder"))
                 return true;
 
             // Client can pay for their order
             if (method == "PATCH" && lower.Contains("/pay"))
+                return true;
+
+            // Client can track their order status
+            if (method == "GET" && lower.Contains("/api/orders/") && lower.EndsWith("/track"))
                 return true;
 
             // Static files and non-API paths are always public

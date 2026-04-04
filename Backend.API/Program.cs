@@ -62,6 +62,22 @@ namespace Backend.API
 
                     db.SaveChanges();
                 }
+
+                // ── Seed tavoli ──
+                if (!db.Tables.Any())
+                {
+                    for (int i = 1; i <= 10; i++)
+                    {
+                        db.Tables.Add(new TableModel
+                        {
+                            Number = i,
+                            Name = $"Tavolo {i}",
+                            Token = Guid.NewGuid().ToString("N"),
+                            IsActive = true
+                        });
+                    }
+                    db.SaveChanges();
+                }
             }
 
             // CORS
