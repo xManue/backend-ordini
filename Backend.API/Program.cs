@@ -1,3 +1,4 @@
+using Backend.Core.Models;
 using Backend.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,6 +41,22 @@ namespace Backend.API
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 db.Database.EnsureCreated();
+                if (!db.Products.Any())
+                {
+                    db.Products.AddRange(new List<ProductModel>
+        {
+            new ProductModel { Name = "Pizza Margherita", Price = 8.5m, Category = "pizza", IsAvailable = true },
+            new ProductModel { Name = "Coca Cola", Price = 3m, Category = "bevande", IsAvailable = true },
+            new ProductModel { Name = "Tiramisu", Price = 5m, Category = "dessert", IsAvailable = true },
+            new ProductModel { Name = "Pizza Pepperoni", Price = 9.5m, Category = "pizza", IsAvailable = true },
+            new ProductModel { Name = "Fanta", Price = 3m, Category = "bevande", IsAvailable = true },
+            new ProductModel { Name = "Gelato", Price = 4m, Category = "dessert", IsAvailable = true },
+            new ProductModel { Name = "Pizza Veggie", Price = 9m, Category = "pizza", IsAvailable = true },
+            new ProductModel { Name = "Sprite", Price = 3m, Category = "bevande", IsAvailable = true },
+        });
+
+                    db.SaveChanges();
+                }
             }
 
             // CORS
