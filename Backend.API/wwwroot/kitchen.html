@@ -19,7 +19,8 @@
     .status-badge.ready { background-color: rgba(34,197,94,0.2); color: #22c55e; }
     .status-count { font-size: 1.5rem; font-weight: 700; }
     .main { padding: 1.5rem; max-width: 1800px; margin: 0 auto; }
-    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); gap: 1.25rem; }
+    @media (min-width: 640px) { .orders-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
     .order-card { background-color: #1e2732; border-radius: 12px; border: 2px solid #2f3942; overflow: hidden; transition: all 0.3s ease; }
     .order-card.paid { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59,130,246,0.3); animation: pulse-border 2s infinite; }
     .order-card.preparing { border-color: #f59e0b; }
@@ -81,10 +82,14 @@
         </div>
     </main>
     <script>
-        const password = prompt("Inserisci password:");
-
-        if (password !== "1234") {
-            document.body.innerHTML = "Accesso negato";
+        let password = sessionStorage.getItem('kitchen-key');
+        if (!password) {
+            password = prompt("Inserisci password cucina:");
+            if (!password) {
+                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-size:1.5rem;color:#ef4444;">Accesso negato</div>';
+                throw new Error('No password');
+            }
+            sessionStorage.setItem('kitchen-key', password);
         }
     </script>
 
@@ -92,9 +97,22 @@
         const API_BASE = window.location.origin + "/api";
         let orders = [];
 
+        function handle401(res) {
+            if (res.status === 401) {
+                sessionStorage.removeItem('kitchen-key');
+                alert('Password errata o sessione scaduta. Ricarica la pagina.');
+                location.reload();
+                return true;
+            }
+            return false;
+        }
+
         async function fetchOrders() {
             try {
-                const res = await fetch(`${API_BASE}/getorders`);
+                const res = await fetch(`${API_BASE}/Orders/getorders`, {
+                    headers: { 'X-Api-Key': password }
+                });
+                if (handle401(res)) return;
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 orders = data
@@ -135,11 +153,11 @@
             if (btn) { btn.disabled = true; btn.textContent = '...'; }
             try {
                 let endpoint = '';
-                if (target === 'preparing') endpoint = `${API_BASE}/${orderId}/Preparing`;
-                else if (target === 'ready') endpoint = `${API_BASE}/${orderId}/Ready`;
-                else if (target === 'completed') endpoint = `${API_BASE}/${orderId}/Completed`;
+                if (target === 'preparing') endpoint = `${API_BASE}/Orders/${orderId}/Preparing`;
+                else if (target === 'ready') endpoint = `${API_BASE}/Orders/${orderId}/Ready`;
+                else if (target === 'completed') endpoint = `${API_BASE}/Orders/${orderId}/Completed`;
                 else return;
-                const res = await fetch(endpoint, { method: 'PATCH' });
+                const res = await fetch(endpoint, { method: 'PATCH', headers: { 'X-Api-Key': password } });
                 if (!res.ok) { const txt = await res.text().catch(() => ''); throw new Error(txt || `HTTP ${res.status}`); }
                 await fetchOrders();
             } catch (err) {

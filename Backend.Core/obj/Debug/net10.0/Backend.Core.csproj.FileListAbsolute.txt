@@ -20,3 +20,4 @@ C:\Users\manue\Desktop\ProgettoMC\Backend.Core\obj\Debug\net10.0\Backend.Core.dl
 C:\Users\manue\Desktop\ProgettoMC\Backend.Core\obj\Debug\net10.0\refint\Backend.Core.dll
 C:\Users\manue\Desktop\ProgettoMC\Backend.Core\obj\Debug\net10.0\Backend.Core.pdb
 C:\Users\manue\Desktop\ProgettoMC\Backend.Core\obj\Debug\net10.0\ref\Backend.Core.dll
+C:\Users\manue\Desktop\ProgettoMC\Backend.Core\obj\Debug\net10.0\Backend.Core.sourcelink.json

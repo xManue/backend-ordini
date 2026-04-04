@@ -28,3 +28,4 @@ C:\Users\manue\Desktop\ProgettoMC\Backend.Infrastructure\obj\Debug\net10.0\Backe
 C:\Users\manue\Desktop\ProgettoMC\Backend.Infrastructure\obj\Debug\net10.0\refint\Backend.Infrastructure.dll
 C:\Users\manue\Desktop\ProgettoMC\Backend.Infrastructure\obj\Debug\net10.0\Backend.Infrastructure.pdb
 C:\Users\manue\Desktop\ProgettoMC\Backend.Infrastructure\obj\Debug\net10.0\ref\Backend.Infrastructure.dll
+C:\Users\manue\Desktop\ProgettoMC\Backend.Infrastructure\obj\Debug\net10.0\Backend.Infrastructure.sourcelink.json

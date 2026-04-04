@@ -1,3 +1,4 @@
+using Backend.API.Middleware;
 using Backend.Core.Models;
 using Backend.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +30,11 @@ namespace Backend.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=app.db"));
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                var dbPath = Path.Combine(AppContext.BaseDirectory, "ristorante.db");
+                options.UseSqlite($"Data Source={dbPath}");
+            });
 
             var app = builder.Build();
 
@@ -61,6 +66,9 @@ namespace Backend.API
 
             // CORS
             app.UseCors();
+
+            // API Key protection for admin endpoints
+            app.UseMiddleware<ApiKeyMiddleware>();
 
             // Frontend (wwwroot)
             app.UseDefaultFiles();

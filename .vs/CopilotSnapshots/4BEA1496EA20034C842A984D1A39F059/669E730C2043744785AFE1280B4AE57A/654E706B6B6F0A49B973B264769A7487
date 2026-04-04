@@ -1,0 +1,238 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kitchen Display System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0f1419; color: #e7e9ea; min-height: 100vh; }
+    .header { background-color: #16202a; border-bottom: 1px solid #2f3942; padding: 1rem 1.5rem; position: sticky; top: 0; z-index: 100; }
+    .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1800px; margin: 0 auto; }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    .logo { font-size: 1.75rem; font-weight: 700; color: #22c55e; }
+    .clock { font-size: 1.5rem; font-weight: 600; color: #9ca3af; font-variant-numeric: tabular-nums; }
+    .status-badges { display: flex; gap: 1rem; }
+    .status-badge { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 1.125rem; font-weight: 600; }
+    .status-badge.paid { background-color: rgba(59,130,246,0.2); color: #60a5fa; }
+    .status-badge.preparing { background-color: rgba(245,158,11,0.2); color: #fbbf24; }
+    .status-badge.ready { background-color: rgba(34,197,94,0.2); color: #22c55e; }
+    .status-count { font-size: 1.5rem; font-weight: 700; }
+    .main { padding: 1.5rem; max-width: 1800px; margin: 0 auto; }
+    .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); gap: 1.25rem; }
+    @media (min-width: 640px) { .orders-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
+    .order-card { background-color: #1e2732; border-radius: 12px; border: 2px solid #2f3942; overflow: hidden; transition: all 0.3s ease; }
+    .order-card.paid { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59,130,246,0.3); animation: pulse-border 2s infinite; }
+    .order-card.preparing { border-color: #f59e0b; }
+    .order-card.ready { border-color: #22c55e; opacity: 0.7; }
+    @keyframes pulse-border { 0%,100% { box-shadow: 0 0 20px rgba(59,130,246,0.3); } 50% { box-shadow: 0 0 30px rgba(59,130,246,0.5); } }
+    .card-header { padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #2f3942; }
+    .order-info { display: flex; flex-direction: column; gap: 0.25rem; }
+    .order-number { font-size: 2rem; font-weight: 800; line-height: 1; }
+    .order-number.paid { color: #60a5fa; } .order-number.preparing { color: #fbbf24; } .order-number.ready { color: #22c55e; }
+    .order-table { font-size: 1.125rem; color: #9ca3af; font-weight: 500; }
+    .order-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; }
+    .status-tag { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .status-tag.paid { background-color: #3b82f6; color: #fff; animation: blink 1s infinite; }
+    .status-tag.preparing { background-color: #f59e0b; color: #000; }
+    .status-tag.ready { background-color: #22c55e; color: #000; }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+    .time-elapsed { font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .time-elapsed.warning { color: #f59e0b; } .time-elapsed.urgent { color: #ef4444; }
+    .items-list { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px dashed #2f3942; }
+    .item-row:last-child { border-bottom: none; }
+    .item-name { font-size: 1.25rem; font-weight: 600; }
+    .item-quantity { font-size: 1.5rem; font-weight: 800; color: #22c55e; background-color: rgba(34,197,94,0.15); padding: 0.25rem 0.75rem; border-radius: 8px; min-width: 3rem; text-align: center; }
+    .card-actions { padding: 1rem 1.25rem; display: flex; gap: 0.75rem; border-top: 1px solid #2f3942; }
+    .btn { flex: 1; padding: 1rem; border: none; border-radius: 8px; font-size: 1.125rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.05em; }
+    .btn:active { transform: scale(0.98); } .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-preparing { background-color: #f59e0b; color: #000; } .btn-preparing:hover:not(:disabled) { background-color: #d97706; }
+    .btn-ready { background-color: #22c55e; color: #000; } .btn-ready:hover:not(:disabled) { background-color: #16a34a; }
+    .btn-done { background-color: #2f3942; color: #9ca3af; } .btn-done:hover:not(:disabled) { background-color: #374151; }
+    .empty-state { grid-column: 1/-1; text-align: center; padding: 4rem 2rem; color: #6b7280; }
+    .empty-icon { font-size: 4rem; margin-bottom: 1rem; } .empty-text { font-size: 1.5rem; font-weight: 600; }
+    .conn-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: #9ca3af; }
+    .conn-dot { width: 10px; height: 10px; border-radius: 50%; background-color: #22c55e; }
+    .conn-dot.error { background-color: #ef4444; animation: blink 1s infinite; }
+    @media (max-width: 768px) { .header-content { flex-direction: column; gap: 1rem; } .status-badges { flex-wrap: wrap; justify-content: center; } .orders-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <span class="logo">🔥 CUCINA</span>
+                <span class="clock" id="clock">00:00:00</span>
+                <div class="conn-status">
+                    <span class="conn-dot" id="conn-dot"></span>
+                    <span id="conn-text">Connesso</span>
+                </div>
+            </div>
+            <div class="status-badges">
+                <div class="status-badge paid"><span>NUOVI</span><span class="status-count" id="paid-count">0</span></div>
+                <div class="status-badge preparing"><span>IN PREP.</span><span class="status-count" id="preparing-count">0</span></div>
+                <div class="status-badge ready"><span>PRONTI</span><span class="status-count" id="ready-count">0</span></div>
+            </div>
+        </div>
+    </header>
+    <main class="main">
+        <div class="orders-grid" id="orders-grid">
+            <div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Caricamento ordini...</div></div>
+        </div>
+    </main>
+    <script>
+        const password = prompt("Inserisci password:");
+
+        if (password !== "1234") {
+            document.body.innerHTML = "Accesso negato";
+        }
+    </script>
+
+    <script>
+        const API_BASE = window.location.origin + "/api";
+        let orders = [];
+
+        async function fetchOrders() {
+            try {
+                const res = await fetch(`${API_BASE}/getorders`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                orders = data
+                    .filter(o => {
+                        const s = normalizeStatus(o.status);
+                        return s === 'paid' || s === 'preparing' || s === 'ready';
+                    })
+                    .map(o => ({
+                        id: o.id,
+                        status: normalizeStatus(o.status),
+                        createdAt: o.createdAt,
+                        paidAt: o.paidAt,
+                        totalPrice: o.totalPrice,
+                        tableNumber: o.tableNumber,
+                        items: (o.orderItems || []).map(i => ({
+                            name: i.product?.name ?? `Prodotto #${i.productId}`,
+                            quantity: i.quantity
+                        }))
+                    }));
+                setConnected(true);
+                renderOrders();
+            } catch (err) {
+                console.error('Errore fetch ordini:', err);
+                setConnected(false);
+            }
+        }
+
+        function normalizeStatus(status) {
+            const s = (status ?? '').toString().toLowerCase();
+            if (s === 'paid' || s === '1') return 'paid';
+            if (s === 'preparing' || s === '2') return 'preparing';
+            if (s === 'ready' || s === '3') return 'ready';
+            return s;
+        }
+
+        async function changeStatus(orderId, target) {
+            const btn = event?.target;
+            if (btn) { btn.disabled = true; btn.textContent = '...'; }
+            try {
+                let endpoint = '';
+                if (target === 'preparing') endpoint = `${API_BASE}/${orderId}/Preparing`;
+                else if (target === 'ready') endpoint = `${API_BASE}/${orderId}/Ready`;
+                else if (target === 'completed') endpoint = `${API_BASE}/${orderId}/Completed`;
+                else return;
+                const res = await fetch(endpoint, { method: 'PATCH' });
+                if (!res.ok) { const txt = await res.text().catch(() => ''); throw new Error(txt || `HTTP ${res.status}`); }
+                await fetchOrders();
+            } catch (err) {
+                console.error('Errore cambio stato:', err);
+                alert('Errore: ' + (err.message || err));
+                await fetchOrders();
+            }
+        }
+
+        function renderOrders() {
+            const grid = document.getElementById('orders-grid');
+            const priority = { paid: 0, preparing: 1, ready: 2 };
+            const sorted = [...orders].sort((a, b) => {
+                const pa = priority[a.status] ?? 99, pb = priority[b.status] ?? 99;
+                if (pa !== pb) return pa - pb;
+                return new Date(a.createdAt) - new Date(b.createdAt);
+            });
+            if (sorted.length === 0) {
+                grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🍽️</div><div class="empty-text">Nessun ordine in coda</div></div>`;
+            } else {
+                grid.innerHTML = sorted.map(renderCard).join('');
+            }
+            document.getElementById('paid-count').textContent = orders.filter(o => o.status === 'paid').length;
+            document.getElementById('preparing-count').textContent = orders.filter(o => o.status === 'preparing').length;
+            document.getElementById('ready-count').textContent = orders.filter(o => o.status === 'ready').length;
+        }
+
+        function renderCard(order) {
+            const elapsed = formatElapsed(order.paidAt || order.createdAt);
+            const timeClass = getTimeClass(order.paidAt || order.createdAt);
+            const labels = { paid: 'NUOVO ORDINE', preparing: 'IN PREPARAZIONE', ready: 'PRONTO' };
+            const tableLabel = order.tableNumber ? `Tavolo ${order.tableNumber}` : 'Asporto';
+
+            let actions = '';
+            if (order.status === 'paid') {
+                actions = `<button class="btn btn-preparing" onclick="changeStatus(${order.id}, 'preparing')">🍳 Prepara</button>`;
+            } else if (order.status === 'preparing') {
+                actions = `<button class="btn btn-preparing" disabled>🍳 In preparazione...</button><button class="btn btn-ready" onclick="changeStatus(${order.id}, 'ready')">✅ Pronto</button>`;
+            } else if (order.status === 'ready') {
+                actions = `<button class="btn btn-done" onclick="changeStatus(${order.id}, 'completed')">🏁 Consegnato</button>`;
+            }
+
+            return `
+            <div class="order-card ${order.status}">
+              <div class="card-header">
+                <div class="order-info">
+                  <span class="order-number ${order.status}">#${order.id}</span>
+                  <span class="order-table">${escapeHtml(tableLabel)}</span>
+                </div>
+                <div class="order-meta">
+                  <span class="status-tag ${order.status}">${labels[order.status] || order.status}</span>
+                  <span class="time-elapsed ${timeClass}">${elapsed}</span>
+                </div>
+              </div>
+              <div class="items-list">
+                ${order.items.map(it => `<div class="item-row"><div class="item-name">${escapeHtml(it.name)}</div><span class="item-quantity">x${it.quantity}</span></div>`).join('')}
+              </div>
+              <div class="card-actions">${actions}</div>
+            </div>`;
+        }
+
+        function formatElapsed(ts) {
+            const totalSec = Math.max(0, Math.floor((Date.now() - new Date(ts).getTime()) / 1000));
+            return `${Math.floor(totalSec / 60)}:${(totalSec % 60).toString().padStart(2, '0')}`;
+        }
+        function getTimeClass(ts) {
+            const min = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
+            if (min >= 10) return 'urgent';
+            if (min >= 5) return 'warning';
+            return '';
+        }
+        function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+        function setConnected(ok) {
+            document.getElementById('conn-dot').classList.toggle('error', !ok);
+            document.getElementById('conn-text').textContent = ok ? 'Connesso' : 'Disconnesso';
+        }
+        function updateClock() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('it-IT', { hour12: false }); }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+        fetchOrders();
+        setInterval(fetchOrders, 3000);
+        setInterval(() => {
+            document.querySelectorAll('.order-card').forEach(card => {
+                const id = parseInt(card.querySelector('.order-number')?.textContent?.replace('#', ''));
+                const order = orders.find(o => o.id === id);
+                if (order) {
+                    const el = card.querySelector('.time-elapsed');
+                    if (el) { const ts = order.paidAt || order.createdAt; el.textContent = formatElapsed(ts); el.className = 'time-elapsed ' + getTimeClass(ts); }
+                }
+            });
+        }, 1000);
+    </script>
+</body>
+</html> 
