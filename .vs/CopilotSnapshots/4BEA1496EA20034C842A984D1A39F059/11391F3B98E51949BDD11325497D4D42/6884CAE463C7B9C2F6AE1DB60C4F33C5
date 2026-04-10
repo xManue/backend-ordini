@@ -1,0 +1,230 @@
+﻿using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Input;
+using Applicazione_OrdiniInterna.Helpers;
+using Applicazione_OrdiniInterna.Models;
+using Applicazione_OrdiniInterna.Services;
+
+namespace Applicazione_OrdiniInterna.ViewModels;
+
+public class AdminViewModel : ObservableBase
+{
+    private readonly ApiService _api;
+
+    public AdminViewModel(ApiService api)
+    {
+        _api = api;
+
+        // Products
+        AddProductCommand = new RelayCommand(_ => OpenProductDialog(null));
+        EditProductCommand = new RelayCommand(p => OpenProductDialog(p as ProductDto));
+        DeleteProductCommand = new AsyncRelayCommand(DeleteProduct);
+        ToggleAvailabilityCommand = new AsyncRelayCommand(ToggleAvailability);
+        RefreshProductsCommand = new AsyncRelayCommand(LoadProductsAsync);
+
+        // Orders
+        RefreshOrdersCommand = new AsyncRelayCommand(LoadOrderHistoryAsync);
+        SetOrderStatusCommand = new AsyncRelayCommand(SetOrderStatus);
+
+        ActiveTab = "Prodotti";
+        SwitchTabCommand = new RelayCommand(SwitchTab);
+    }
+
+    // ── Tab Navigation ──
+    private string _activeTab = "Prodotti";
+    public string ActiveTab
+    {
+        get => _activeTab;
+        set { SetField(ref _activeTab, value); OnPropertyChanged(nameof(ShowProducts)); OnPropertyChanged(nameof(ShowTables)); OnPropertyChanged(nameof(ShowOrders)); }
+    }
+
+    public bool ShowProducts => ActiveTab == "Prodotti";
+    public bool ShowTables => ActiveTab == "Tavoli";
+    public bool ShowOrders => ActiveTab == "Storico";
+
+    public ICommand SwitchTabCommand { get; }
+
+    private void SwitchTab(object? param)
+    {
+        ActiveTab = param?.ToString() ?? "Prodotti";
+    }
+
+    // ══════════════════════ PRODUCTS ══════════════════════
+    private List<ProductDto> _allProducts = [];
+    public ObservableCollection<ProductDto> Products { get; } = [];
+    public ObservableCollection<string> ProductCategories { get; } = [];
+
+    private string _productSearch = "";
+    public string ProductSearch
+    {
+        get => _productSearch;
+        set { SetField(ref _productSearch, value); ApplyProductFilter(); }
+    }
+
+    private string _productCategoryFilter = "Tutte";
+    public string ProductCategoryFilter
+    {
+        get => _productCategoryFilter;
+        set { SetField(ref _productCategoryFilter, value); ApplyProductFilter(); }
+    }
+
+    public ICommand AddProductCommand { get; }
+    public ICommand EditProductCommand { get; }
+    public ICommand DeleteProductCommand { get; }
+    public ICommand ToggleAvailabilityCommand { get; }
+    public ICommand RefreshProductsCommand { get; }
+
+    private async Task LoadProductsAsync()
+    {
+        try
+        {
+            _allProducts = await _api.GetProductsAsync();
+            ProductCategories.Clear();
+            ProductCategories.Add("Tutte");
+            foreach (var c in _allProducts.Select(p => p.Category ?? "Altro").Distinct().OrderBy(c => c))
+                ProductCategories.Add(c);
+            ApplyProductFilter();
+        }
+        catch (Exception ex) { MessageBox.Show($"Errore: {ex.Message}"); }
+    }
+
+    private void ApplyProductFilter()
+    {
+        var search = (ProductSearch ?? "").ToLowerInvariant();
+        var filtered = _allProducts.Where(p =>
+        {
+            var matchSearch = string.IsNullOrEmpty(search)
+                || (p.Name ?? "").Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                || (p.Description ?? "").Contains(search, StringComparison.CurrentCultureIgnoreCase);
+            var matchCat = ProductCategoryFilter == "Tutte" || (p.Category ?? "Altro") == ProductCategoryFilter;
+            return matchSearch && matchCat;
+        });
+
+        Products.Clear();
+        foreach (var p in filtered)
+            Products.Add(p);
+    }
+
+    private void OpenProductDialog(ProductDto? existing)
+    {
+        var dlg = new Dialogs.ProductDialog(existing);
+        var owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+        if (owner != null) dlg.Owner = owner;
+        if (dlg.ShowDialog() == true)
+        {
+            _ = SaveProductAsync(existing?.Id, dlg.Result);
+        }
+    }
+
+    private async Task SaveProductAsync(int? id, ProductDto dto)
+    {
+        try
+        {
+            if (id.HasValue)
+                await _api.UpdateProductAsync(id.Value, dto);
+            else
+                await _api.CreateProductAsync(dto);
+            await LoadProductsAsync();
+        }
+        catch (Exception ex) { MessageBox.Show($"Errore salvataggio:\n{ex.Message}"); }
+    }
+
+    private async Task DeleteProduct(object? param)
+    {
+        if (param is not int id) return;
+        var product = _allProducts.FirstOrDefault(p => p.Id == id);
+        if (product == null) return;
+        if (MessageBox.Show($"Eliminare \"{product.Name}\"?", "Conferma", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+        try { await _api.DeleteProductAsync(id); await LoadProductsAsync(); }
+        catch (Exception ex) { MessageBox.Show(ex.Message); }
+    }
+
+    private async Task ToggleAvailability(object? param)
+    {
+        if (param is not int id) return;
+        try { await _api.ToggleProductAvailabilityAsync(id); await LoadProductsAsync(); }
+        catch (Exception ex) { MessageBox.Show(ex.Message); }
+    }
+
+    // ══════════════════════ ORDER HISTORY ══════════════════════
+    private List<OrderDto> _allOrders = [];
+    public ObservableCollection<OrderDto> OrderHistory { get; } = [];
+
+    private DateTime? _dateFilter;
+    public DateTime? DateFilter
+    {
+        get => _dateFilter;
+        set { SetField(ref _dateFilter, value); ApplyOrderFilter(); }
+    }
+
+    private string _orderStatusFilter = "Tutti";
+    public string OrderStatusFilter
+    {
+        get => _orderStatusFilter;
+        set { SetField(ref _orderStatusFilter, value); ApplyOrderFilter(); }
+    }
+
+    public ICommand RefreshOrdersCommand { get; }
+    public ICommand SetOrderStatusCommand { get; }
+
+    private async Task LoadOrderHistoryAsync()
+    {
+        try
+        {
+            _allOrders = await _api.GetOrdersAsync();
+            ApplyOrderFilter();
+        }
+        catch (Exception ex) { MessageBox.Show($"Errore: {ex.Message}"); }
+    }
+
+    private void ApplyOrderFilter()
+    {
+        var filtered = _allOrders.AsEnumerable();
+
+        if (DateFilter.HasValue)
+        {
+            var date = DateFilter.Value.Date;
+            filtered = filtered.Where(o => o.CreatedAt.Date == date);
+        }
+
+        if (OrderStatusFilter != "Tutti")
+        {
+            filtered = filtered.Where(o =>
+                KitchenViewModel.NormalizeStatus(o.Status) == OrderStatusFilter.ToLowerInvariant());
+        }
+
+        OrderHistory.Clear();
+        foreach (var o in filtered.OrderByDescending(o => o.CreatedAt))
+            OrderHistory.Add(o);
+    }
+
+    private async Task SetOrderStatus(object? param)
+    {
+        if (param is not string combined) return;
+        var parts = combined.Split('|');
+        if (parts.Length != 2 || !int.TryParse(parts[0], out var id)) return;
+        var targetStatus = parts[1];
+
+        try
+        {
+            switch (targetStatus)
+            {
+                case "paid": await _api.PayOrderAsync(id); break;
+                case "preparing": await _api.SetPreparingAsync(id); break;
+                case "ready": await _api.SetReadyAsync(id); break;
+                case "completed": await _api.SetCompletedAsync(id); break;
+                case "cancelled": await _api.CancelOrderAsync(id); break;
+            }
+            await LoadOrderHistoryAsync();
+        }
+        catch (Exception ex) { MessageBox.Show($"Errore: {ex.Message}"); }
+    }
+
+    // ── Start ──
+    public void Start()
+    {
+        _ = LoadProductsAsync();
+        _ = LoadOrderHistoryAsync();
+    }
+}

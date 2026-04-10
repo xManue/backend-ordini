@@ -1,0 +1,78 @@
+﻿using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using Applicazione_OrdiniInterna.Services;
+
+namespace Applicazione_OrdiniInterna
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        public static ApiService Api { get; private set; } = new();
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            Loaded += async (_, _) => await ConnectAndRefresh();
+        }
+
+        private async Task ConnectAndRefresh()
+        {
+            try
+            {
+                Api.SetBaseUrl(ServerUrlBox.Text.Trim());
+                Api.ApiKey = ApiKeyBox.Text.Trim();
+
+                // Test connection by fetching products
+                await Api.GetProductsAsync();
+
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(34, 197, 94));
+                StatusText.Text = "Connesso";
+
+                KitchenPanel.Initialize(Api);
+                DashboardPanel.Initialize(Api);
+                TablesPanel.Initialize(Api);
+            }
+            catch (Exception ex)
+            {
+                StatusDot.Fill = new SolidColorBrush(Color.FromRgb(239, 68, 68));
+                StatusText.Text = "Errore connessione";
+                MessageBox.Show($"Impossibile connettersi al server:\n{ex.Message}", "Errore", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private async void ConnectClick(object sender, RoutedEventArgs e)
+        {
+            await ConnectAndRefresh();
+        }
+
+        private void ShowPanel(UIElement panel)
+        {
+            KitchenPanel.Visibility = Visibility.Collapsed;
+            DashboardPanel.Visibility = Visibility.Collapsed;
+            TablesPanel.Visibility = Visibility.Collapsed;
+            panel.Visibility = Visibility.Visible;
+
+            NavKitchen.Style = (Style)FindResource("SidebarButton");
+            NavDashboard.Style = (Style)FindResource("SidebarButton");
+            NavTables.Style = (Style)FindResource("SidebarButton");
+
+            if (panel == KitchenPanel) NavKitchen.Style = (Style)FindResource("SidebarButtonActive");
+            else if (panel == DashboardPanel) NavDashboard.Style = (Style)FindResource("SidebarButtonActive");
+            else if (panel == TablesPanel) NavTables.Style = (Style)FindResource("SidebarButtonActive");
+        }
+
+        private void NavKitchenClick(object sender, RoutedEventArgs e) => ShowPanel(KitchenPanel);
+        private void NavDashboardClick(object sender, RoutedEventArgs e) => ShowPanel(DashboardPanel);
+        private void NavTablesClick(object sender, RoutedEventArgs e) => ShowPanel(TablesPanel);
+    }
+}

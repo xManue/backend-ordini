@@ -1,0 +1,25 @@
+﻿using System.Windows;
+
+namespace Applicazione_OrdiniInterna.Dialogs;
+
+public partial class TableDialog : Window
+{
+    public int TableNumber { get; private set; }
+    public string? TableName { get; private set; }
+
+    public TableDialog() => InitializeComponent();
+
+    private void SaveClick(object sender, RoutedEventArgs e)
+    {
+        if (!int.TryParse(NumBox.Text, out var num) || num < 1)
+        {
+            MessageBox.Show("Numero tavolo non valido.", "Errore", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        TableNumber = num;
+        TableName = string.IsNullOrWhiteSpace(NameBox.Text) ? null : NameBox.Text.Trim();
+        DialogResult = true;
+    }
+
+    private void CancelClick(object sender, RoutedEventArgs e) => DialogResult = false;
+}

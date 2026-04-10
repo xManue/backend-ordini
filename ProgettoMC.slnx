@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Applicazione-OrdiniInterna/Applicazione-OrdiniInterna.csproj" Id="03127c28-e1a6-4e1d-b64f-d01d08dfafad" />
   <Project Path="Backend.API/Backend.API.csproj" />
   <Project Path="Backend.Core/Backend.Core.csproj" />
   <Project Path="Backend.Infrastructure/Backend.Infrastructure.csproj" />

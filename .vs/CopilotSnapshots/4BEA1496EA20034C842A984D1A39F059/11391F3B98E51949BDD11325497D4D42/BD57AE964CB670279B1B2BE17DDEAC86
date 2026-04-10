@@ -1,0 +1,106 @@
+﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using Applicazione_OrdiniInterna.Models;
+using Applicazione_OrdiniInterna.ViewModels;
+
+namespace Applicazione_OrdiniInterna.Views;
+
+public partial class AdminView : UserControl
+{
+    public AdminView()
+    {
+        InitializeComponent();
+    }
+
+    private AdminViewModel? Vm => DataContext as AdminViewModel;
+
+    private void ShowQrClick(object sender, RoutedEventArgs e)
+    {
+        if (Vm == null) return;
+        if (sender is not Button btn || btn.Tag is not TableDto table) return;
+
+        var url = Vm.GetTableMenuUrl(table.Token);
+        var qrUrl = Vm.GetQrCodeUrl(table.Token);
+
+        var dlg = new Window
+        {
+            Title = $"QR — {table.Name ?? $"Tavolo {table.Number}"}",
+            Width = 400,
+            Height = 460,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Owner = Window.GetWindow(this),
+            ResizeMode = ResizeMode.NoResize,
+            Background = System.Windows.Media.Brushes.White
+        };
+
+        var stack = new StackPanel { Margin = new Thickness(24), HorizontalAlignment = HorizontalAlignment.Center };
+        stack.Children.Add(new TextBlock
+        {
+            Text = $"QR — {table.Name ?? $"Tavolo {table.Number}"}",
+            FontSize = 18,
+            FontWeight = FontWeights.SemiBold,
+            HorizontalAlignment = HorizontalAlignment.Center
+        });
+
+        var img = new Image { Width = 250, Height = 250, Margin = new Thickness(0, 16, 0, 16) };
+        try { img.Source = new BitmapImage(new Uri(qrUrl)); } catch { }
+        stack.Children.Add(img);
+
+        stack.Children.Add(new TextBlock
+        {
+            Text = "Scansiona per aprire il menù",
+            FontSize = 12,
+            Foreground = System.Windows.Media.Brushes.Gray,
+            HorizontalAlignment = HorizontalAlignment.Center
+        });
+
+        var urlBox = new TextBox
+        {
+            Text = url,
+            IsReadOnly = true,
+            FontSize = 11,
+            TextAlignment = TextAlignment.Center,
+            Margin = new Thickness(0, 8, 0, 12),
+            Padding = new Thickness(6)
+        };
+        stack.Children.Add(urlBox);
+
+        var copyBtn = new Button
+        {
+            Content = "📋 Copia Link",
+            Style = (Style)FindResource("BrandButton")
+        };
+        copyBtn.Click += (_, _) => { Clipboard.SetText(url); MessageBox.Show("Link copiato!"); };
+        stack.Children.Add(copyBtn);
+
+        dlg.Content = stack;
+        dlg.ShowDialog();
+    }
+
+    private void AdvanceOrderClick(object sender, RoutedEventArgs e)
+    {
+        if (Vm == null) return;
+        if (sender is not Button btn || btn.Tag is not OrderDto order) return;
+
+        var currentStatus = KitchenViewModel.NormalizeStatus(order.Status);
+        var nextStatus = currentStatus switch
+        {
+            "pending" => "paid",
+            "paid" => "preparing",
+            "preparing" => "ready",
+            "ready" => "completed",
+            _ => null
+        };
+
+        if (nextStatus == null)
+        {
+            MessageBox.Show("L'ordine non può avanzare ulteriormente.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var param = $"{order.Id}|{nextStatus}";
+        if (Vm.SetOrderStatusCommand.CanExecute(param))
+            Vm.SetOrderStatusCommand.Execute(param);
+    }
+}

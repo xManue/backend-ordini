@@ -1,0 +1,105 @@
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
+namespace Applicazione_OrdiniInterna.Models;
+
+public class ProductDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public decimal Price { get; set; }
+    public string? Description { get; set; }
+    public string? Category { get; set; }
+    public bool IsAvailable { get; set; }
+}
+
+public class OrderDto
+{
+    public int Id { get; set; }
+    public string Status { get; set; } = "";
+    public int? TableNumber { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime PaidAt { get; set; }
+    public DateTime PreparingAt { get; set; }
+    public DateTime ReadyAt { get; set; }
+    public DateTime CompletedAt { get; set; }
+    public DateTime CancelledAt { get; set; }
+    public decimal TotalPrice { get; set; }
+    public List<OrderItemDto> OrderItems { get; set; } = [];
+}
+
+public class OrderItemDto
+{
+    public int Id { get; set; }
+    public int ProductId { get; set; }
+    public ProductDto? Product { get; set; }
+    public int Quantity { get; set; }
+    public decimal UnitPrice { get; set; }
+}
+
+public class TrackOrderDto
+{
+    public int Id { get; set; }
+    public string Status { get; set; } = "";
+    public int StatusCode { get; set; }
+    public decimal TotalPrice { get; set; }
+    public int? TableNumber { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public List<TrackOrderItemDto> Items { get; set; } = [];
+}
+
+public class TrackOrderItemDto
+{
+    public string ProductName { get; set; } = "";
+    public int Quantity { get; set; }
+    public decimal UnitPrice { get; set; }
+}
+
+public class TableDto
+{
+    public int Id { get; set; }
+    public int Number { get; set; }
+    public string? Name { get; set; }
+    public string Token { get; set; } = "";
+    public bool IsActive { get; set; }
+}
+
+public class CreateOrderRequest
+{
+    public string? TableToken { get; set; }
+    public List<CreateOrderItemRequest> OrderItems { get; set; } = [];
+}
+
+public class CreateOrderItemRequest
+{
+    public int ProductId { get; set; }
+    public int Quantity { get; set; }
+}
+
+public class CartItem : ObservableBase
+{
+    public ProductDto Product { get; set; } = null!;
+
+    private int _quantity;
+    public int Quantity
+    {
+        get => _quantity;
+        set { _quantity = value; OnPropertyChanged(); OnPropertyChanged(nameof(Total)); }
+    }
+
+    public decimal Total => Product.Price * Quantity;
+}
+
+public class ObservableBase : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string? name = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? name = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(name);
+        return true;
+    }
+}

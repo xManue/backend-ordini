@@ -1,0 +1,209 @@
+﻿using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using Applicazione_OrdiniInterna.Models;
+
+namespace Applicazione_OrdiniInterna.Services;
+
+public class ApiService
+{
+    private readonly HttpClient _http;
+    private static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    public string BaseUrl { get; private set; }
+    public string ApiKey { get; set; } = "1234";
+
+    public ApiService(string baseUrl = "http://localhost:5225")
+    {
+        BaseUrl = baseUrl.TrimEnd('/');
+        _http = new HttpClient { BaseAddress = new Uri(BaseUrl) };
+    }
+
+    public void SetBaseUrl(string url)
+    {
+        BaseUrl = url.TrimEnd('/');
+        _http.BaseAddress = new Uri(BaseUrl);
+    }
+
+    private void AddAuth(HttpRequestMessage req)
+    {
+        req.Headers.Add("X-Api-Key", ApiKey);
+    }
+
+    // ── Products ──
+    public async Task<List<ProductDto>> GetProductsAsync(bool onlyAvailable = false)
+    {
+        var url = onlyAvailable
+            ? "/api/Products/GetProducts?disponibile=true"
+            : "/api/Products/GetProducts";
+        var req = new HttpRequestMessage(HttpMethod.Get, url);
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+        return await res.Content.ReadFromJsonAsync<List<ProductDto>>(JsonOpts) ?? [];
+    }
+
+    public async Task<ProductDto> CreateProductAsync(ProductDto dto)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Post, "/api/Products")
+        {
+            Content = JsonContent.Create(new { dto.Name, dto.Price, dto.Category, dto.Description })
+        };
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+        return await res.Content.ReadFromJsonAsync<ProductDto>(JsonOpts) ?? dto;
+    }
+
+    public async Task UpdateProductAsync(int id, ProductDto dto)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Put, $"/api/Products?id={id}")
+        {
+            Content = JsonContent.Create(new { dto.Name, dto.Price, dto.Category, dto.Description })
+        };
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteProductAsync(int id)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Delete, $"/api/Products/{id}");
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task ToggleProductAvailabilityAsync(int id)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Patch, $"/api/Products/{id}/availability");
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    // ── Orders ──
+    public async Task<List<OrderDto>> GetOrdersAsync(string? status = null)
+    {
+        var url = status != null
+            ? $"/api/Orders/getorders?stato={status}"
+            : "/api/Orders/getorders";
+        var req = new HttpRequestMessage(HttpMethod.Get, url);
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+        return await res.Content.ReadFromJsonAsync<List<OrderDto>>(JsonOpts) ?? [];
+    }
+
+    public async Task<OrderDto> CreateOrderAsync(CreateOrderRequest order)
+    {
+        var res = await _http.PostAsJsonAsync("/api/Orders/createorder", order, JsonOpts);
+        res.EnsureSuccessStatusCode();
+        return await res.Content.ReadFromJsonAsync<OrderDto>(JsonOpts) ?? new();
+    }
+
+    public async Task PayOrderAsync(int id)
+    {
+        var res = await _http.PatchAsync($"/api/Orders/{id}/pay", null);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task SetPreparingAsync(int id)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Patch, $"/api/Orders/{id}/Preparing");
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task SetReadyAsync(int id)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Patch, $"/api/Orders/{id}/Ready");
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task SetCompletedAsync(int id)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Patch, $"/api/Orders/{id}/Completed");
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task<TrackOrderDto?> TrackOrderAsync(int id)
+    {
+        var res = await _http.GetAsync($"/api/Orders/{id}/track");
+        if (!res.IsSuccessStatusCode) return null;
+        return await res.Content.ReadFromJsonAsync<TrackOrderDto>(JsonOpts);
+    }
+
+    // ── Tables ──
+    public async Task<List<TableDto>> GetTablesAsync()
+    {
+        var req = new HttpRequestMessage(HttpMethod.Get, "/api/Tables");
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+        return await res.Content.ReadFromJsonAsync<List<TableDto>>(JsonOpts) ?? [];
+    }
+
+    public async Task CreateTableAsync(int number, string? name)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Post, "/api/Tables")
+        {
+            Content = JsonContent.Create(new { number, name })
+        };
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task UpdateTableAsync(int id, int number, string? name)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Put, $"/api/Tables/{id}")
+        {
+            Content = JsonContent.Create(new { number, name })
+        };
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task ToggleTableActiveAsync(int id)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Patch, $"/api/Tables/{id}/toggle");
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task RegenerateTableTokenAsync(int id)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Patch, $"/api/Tables/{id}/regenerate");
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteTableAsync(int id)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Delete, $"/api/Tables/{id}");
+        AddAuth(req);
+        var res = await _http.SendAsync(req);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public string GetQrCodeUrl(string token)
+    {
+        var menuUrl = $"{BaseUrl}/?t={token}";
+        return $"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={Uri.EscapeDataString(menuUrl)}";
+    }
+
+    public string GetTableMenuUrl(string token) => $"{BaseUrl}/?t={token}";
+}

@@ -1,0 +1,113 @@
+﻿<Window x:Class="Applicazione_OrdiniInterna.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Applicazione_OrdiniInterna.ViewModels"
+        xmlns:helpers="clr-namespace:Applicazione_OrdiniInterna.Helpers"
+        Title="Bella Cucina — Gestione Ordini" Height="750" Width="1200"
+        MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource PageBg}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="{StaticResource SidebarBg}">
+            <DockPanel>
+                <!-- Header -->
+                <StackPanel DockPanel.Dock="Top" Margin="20,24,20,8">
+                    <TextBlock Text="🍕 Bella Cucina" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Gestione Sagra" FontSize="11" Foreground="#94A3B8" Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <!-- Connection settings -->
+                <StackPanel DockPanel.Dock="Top" Margin="16,8,16,4">
+                    <TextBlock Text="Server" FontSize="10" Foreground="#94A3B8" Margin="4,0,0,4"/>
+                    <TextBox Text="{Binding ServerUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" FontSize="11" Foreground="#1F2937" Margin="0,0,0,4"/>
+                    <TextBlock Text="API Key" FontSize="10" Foreground="#94A3B8" Margin="4,4,0,4"/>
+                    <TextBox Text="{Binding ApiKey, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" FontSize="11" Foreground="#1F2937" Margin="0,0,0,4"/>
+                    <Button Content="Connetti" Command="{Binding ConnectCommand}" Style="{StaticResource BrandButton}" FontSize="11" Padding="8,6" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <Separator DockPanel.Dock="Top" Background="#334155" Margin="16,12"/>
+
+                <!-- Navigation -->
+                <StackPanel DockPanel.Dock="Top" Margin="12,0">
+                    <Button Content="🛒  Cassa" Command="{Binding NavigateCommand}" CommandParameter="Cassa" Margin="0,2">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActiveNav}" Value="Cassa">
+                                        <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Content="🔥  Cucina" Command="{Binding NavigateCommand}" CommandParameter="Cucina" Margin="0,2">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActiveNav}" Value="Cucina">
+                                        <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Content="📺  Display Clienti" Command="{Binding NavigateCommand}" CommandParameter="Display" Margin="0,2">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActiveNav}" Value="Display">
+                                        <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Content="⚙️  Admin" Command="{Binding NavigateCommand}" CommandParameter="Admin" Margin="0,2">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource SidebarButton}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActiveNav}" Value="Admin">
+                                        <Setter Property="Background" Value="{StaticResource BrandBrush}"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+
+                <!-- Open Separate Windows -->
+                <StackPanel DockPanel.Dock="Top" Margin="12,16,12,0">
+                    <Separator Background="#334155" Margin="4,0,4,8"/>
+                    <TextBlock Text="FINESTRE SEPARATE" FontSize="9" Foreground="#64748B" FontWeight="SemiBold" Margin="4,0,0,6"/>
+                    <Button Content="📺 Display Fullscreen" Click="OpenCustomerDisplayClick" Style="{StaticResource SidebarButton}" FontSize="11" Margin="0,2"/>
+                    <Button Content="🔥 Cucina Fullscreen" Click="OpenKitchenWindowClick" Style="{StaticResource SidebarButton}" FontSize="11" Margin="0,2"/>
+                </StackPanel>
+
+                <!-- Status -->
+                <StackPanel DockPanel.Dock="Bottom" Margin="16,8,16,16" VerticalAlignment="Bottom">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="8" Height="8" Fill="{Binding StatusColor}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding StatusText}" FontSize="11" Foreground="#94A3B8"/>
+                    </StackPanel>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Content Area: binds to CurrentView, resolved via DataTemplates -->
+        <ContentControl Grid.Column="1" Content="{Binding CurrentView}"/>
+    </Grid>
+</Window>

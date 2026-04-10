@@ -1,0 +1,267 @@
+﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Threading;
+using Applicazione_OrdiniInterna.Models;
+using Applicazione_OrdiniInterna.Services;
+
+namespace Applicazione_OrdiniInterna.Views;
+
+public partial class KitchenView : UserControl
+{
+    private ApiService? _api;
+    private DispatcherTimer? _pollTimer;
+    private DispatcherTimer? _clockTimer;
+    private List<OrderDto> _orders = [];
+
+    public KitchenView()
+    {
+        InitializeComponent();
+    }
+
+    public void Initialize(ApiService api)
+    {
+        _api = api;
+
+        _clockTimer?.Stop();
+        _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _clockTimer.Tick += (_, _) => ClockText.Text = DateTime.Now.ToString("HH:mm:ss");
+        _clockTimer.Start();
+
+        _pollTimer?.Stop();
+        _pollTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+        _pollTimer.Tick += async (_, _) => await LoadOrders();
+        _pollTimer.Start();
+
+        _ = LoadOrders();
+    }
+
+    private async Task LoadOrders()
+    {
+        if (_api == null) return;
+        try
+        {
+            var all = await _api.GetOrdersAsync();
+            _orders = all
+                .Where(o => NormalizeStatus(o.Status) is "paid" or "preparing" or "ready")
+                .OrderBy(o => NormalizeStatus(o.Status) switch { "paid" => 0, "preparing" => 1, "ready" => 2, _ => 9 })
+                .ThenBy(o => o.CreatedAt)
+                .ToList();
+
+            RenderOrders();
+        }
+        catch { /* silenzioso in polling */ }
+    }
+
+    private static string NormalizeStatus(string s)
+    {
+        var lower = (s ?? "").ToLowerInvariant();
+        return lower switch
+        {
+            "paid" or "1" => "paid",
+            "preparing" or "2" => "preparing",
+            "ready" or "3" => "ready",
+            _ => lower
+        };
+    }
+
+    private void RenderOrders()
+    {
+        OrdersList.Items.Clear();
+        int paid = 0, prep = 0, ready = 0;
+
+        foreach (var order in _orders)
+        {
+            var status = NormalizeStatus(order.Status);
+            switch (status) { case "paid": paid++; break; case "preparing": prep++; break; case "ready": ready++; break; }
+
+            var (borderColor, statusLabel, statusBg, statusFg) = status switch
+            {
+                "paid" => (Color.FromRgb(59, 130, 246), "NUOVO ORDINE", Color.FromRgb(59, 130, 246), Colors.White),
+                "preparing" => (Color.FromRgb(245, 158, 11), "IN PREPARAZIONE", Color.FromRgb(245, 158, 11), Colors.Black),
+                "ready" => (Color.FromRgb(34, 197, 94), "PRONTO", Color.FromRgb(34, 197, 94), Colors.Black),
+                _ => (Color.FromRgb(107, 114, 128), status.ToUpper(), Color.FromRgb(107, 114, 128), Colors.White)
+            };
+
+            var card = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(30, 39, 50)),
+                BorderBrush = new SolidColorBrush(borderColor),
+                BorderThickness = new Thickness(2),
+                CornerRadius = new CornerRadius(12),
+                Margin = new Thickness(8),
+                Padding = new Thickness(0),
+                Width = 320
+            };
+
+            var cardStack = new StackPanel();
+
+            // Header
+            var headerGrid = new Grid { Margin = new Thickness(16, 12, 16, 8) };
+            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var leftInfo = new StackPanel();
+            leftInfo.Children.Add(new TextBlock
+            {
+                Text = $"#{order.Id}",
+                FontSize = 26,
+                FontWeight = FontWeights.ExtraBold,
+                Foreground = new SolidColorBrush(borderColor)
+            });
+            leftInfo.Children.Add(new TextBlock
+            {
+                Text = order.TableNumber.HasValue ? $"Tavolo {order.TableNumber}" : "Asporto",
+                FontSize = 13,
+                Foreground = new SolidColorBrush(Color.FromRgb(156, 163, 175))
+            });
+            Grid.SetColumn(leftInfo, 0);
+            headerGrid.Children.Add(leftInfo);
+
+            var rightInfo = new StackPanel { HorizontalAlignment = HorizontalAlignment.Right };
+            var tag = new Border
+            {
+                Background = new SolidColorBrush(statusBg),
+                CornerRadius = new CornerRadius(12),
+                Padding = new Thickness(10, 4, 10, 4)
+            };
+            tag.Child = new TextBlock
+            {
+                Text = statusLabel,
+                FontSize = 11,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(statusFg)
+            };
+            rightInfo.Children.Add(tag);
+
+            var elapsed = FormatElapsed(order.PaidAt != default ? order.PaidAt : order.CreatedAt);
+            rightInfo.Children.Add(new TextBlock
+            {
+                Text = elapsed,
+                FontSize = 16,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = new SolidColorBrush(Color.FromRgb(156, 163, 175)),
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 4, 0, 0)
+            });
+            Grid.SetColumn(rightInfo, 1);
+            headerGrid.Children.Add(rightInfo);
+            cardStack.Children.Add(headerGrid);
+
+            // Items
+            var itemsPanel = new StackPanel { Margin = new Thickness(16, 4, 16, 8) };
+            foreach (var item in order.OrderItems)
+            {
+                var row = new DockPanel { Margin = new Thickness(0, 4, 0, 4) };
+                row.Children.Add(new TextBlock
+                {
+                    Text = item.Product?.Name ?? $"Prodotto #{item.ProductId}",
+                    FontSize = 15,
+                    FontWeight = FontWeights.SemiBold,
+                    Foreground = new SolidColorBrush(Color.FromRgb(231, 233, 234))
+                });
+                var qtyBorder = new Border
+                {
+                    Background = new SolidColorBrush(Color.FromArgb(40, 34, 197, 94)),
+                    CornerRadius = new CornerRadius(6),
+                    Padding = new Thickness(8, 2, 8, 2),
+                    HorizontalAlignment = HorizontalAlignment.Right
+                };
+                qtyBorder.Child = new TextBlock
+                {
+                    Text = $"x{item.Quantity}",
+                    FontSize = 16,
+                    FontWeight = FontWeights.ExtraBold,
+                    Foreground = new SolidColorBrush(Color.FromRgb(34, 197, 94))
+                };
+                DockPanel.SetDock(qtyBorder, Dock.Right);
+                row.Children.Add(qtyBorder);
+                itemsPanel.Children.Add(row);
+            }
+            cardStack.Children.Add(itemsPanel);
+
+            // Actions
+            var actionsPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(16, 0, 16, 12),
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+
+            if (status == "paid")
+            {
+                var btn = CreateActionButton("🍳 PREPARA", Color.FromRgb(245, 158, 11), Colors.Black);
+                var orderId = order.Id;
+                btn.Click += async (_, _) => { await SafeAction(async () => { await _api!.SetPreparingAsync(orderId); await LoadOrders(); }); };
+                actionsPanel.Children.Add(btn);
+            }
+            else if (status == "preparing")
+            {
+                var btn = CreateActionButton("✅ PRONTO", Color.FromRgb(34, 197, 94), Colors.Black);
+                var orderId = order.Id;
+                btn.Click += async (_, _) => { await SafeAction(async () => { await _api!.SetReadyAsync(orderId); await LoadOrders(); }); };
+                actionsPanel.Children.Add(btn);
+            }
+            else if (status == "ready")
+            {
+                var btn = CreateActionButton("🏁 CONSEGNATO", Color.FromRgb(47, 57, 66), Color.FromRgb(156, 163, 175));
+                var orderId = order.Id;
+                btn.Click += async (_, _) => { await SafeAction(async () => { await _api!.SetCompletedAsync(orderId); await LoadOrders(); }); };
+                actionsPanel.Children.Add(btn);
+            }
+
+            cardStack.Children.Add(actionsPanel);
+            card.Child = cardStack;
+            OrdersList.Items.Add(card);
+        }
+
+        PaidCount.Text = paid.ToString();
+        PrepCount.Text = prep.ToString();
+        ReadyCount.Text = ready.ToString();
+
+        if (_orders.Count == 0)
+        {
+            OrdersList.Items.Add(new TextBlock
+            {
+                Text = "🍽️ Nessun ordine in coda",
+                FontSize = 20,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = new SolidColorBrush(Color.FromRgb(107, 114, 128)),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 80, 0, 0)
+            });
+        }
+    }
+
+    private static Button CreateActionButton(string text, Color bg, Color fg)
+    {
+        var btn = new Button
+        {
+            Content = text,
+            FontSize = 13,
+            FontWeight = FontWeights.Bold,
+            Foreground = new SolidColorBrush(fg),
+            Background = new SolidColorBrush(bg),
+            Padding = new Thickness(16, 10, 16, 10),
+            BorderThickness = new Thickness(0),
+            Cursor = System.Windows.Input.Cursors.Hand,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            MinWidth = 280
+        };
+        return btn;
+    }
+
+    private static string FormatElapsed(DateTime ts)
+    {
+        if (ts == default) return "-";
+        var span = DateTime.UtcNow - ts;
+        if (span.TotalSeconds < 0) span = TimeSpan.Zero;
+        return $"{(int)span.TotalMinutes}:{span.Seconds:D2}";
+    }
+
+    private async Task SafeAction(Func<Task> action)
+    {
+        try { await action(); }
+        catch (Exception ex) { MessageBox.Show($"Errore: {ex.Message}", "Errore", MessageBoxButton.OK, MessageBoxImage.Warning); }
+    }
+}

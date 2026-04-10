@@ -1,0 +1,19 @@
+﻿<Window x:Class="Applicazione_OrdiniInterna.Dialogs.TableDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Nuovo Tavolo" Height="240" Width="360"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource PageBg}">
+    <StackPanel Margin="24">
+        <TextBlock Text="Numero Tavolo" FontSize="12" FontWeight="Medium" Margin="0,0,0,4"/>
+        <TextBox x:Name="NumBox" Style="{StaticResource ModernTextBox}" Margin="0,0,0,12"/>
+
+        <TextBlock Text="Nome (opzionale)" FontSize="12" FontWeight="Medium" Margin="0,0,0,4"/>
+        <TextBox x:Name="NameBox" Style="{StaticResource ModernTextBox}" Margin="0,0,0,16"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Annulla" Style="{StaticResource SecondaryButton}" Click="CancelClick" Margin="0,0,8,0"/>
+            <Button Content="Salva" Style="{StaticResource BrandButton}" Click="SaveClick"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

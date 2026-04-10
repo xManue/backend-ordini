@@ -1,0 +1,206 @@
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Input;
+using Applicazione_OrdiniInterna.Helpers;
+using Applicazione_OrdiniInterna.Models;
+using Applicazione_OrdiniInterna.Services;
+
+namespace Applicazione_OrdiniInterna.ViewModels;
+
+public class CassaViewModel : ObservableBase
+{
+    private readonly ApiService _api;
+
+    public CassaViewModel(ApiService api)
+    {
+        _api = api;
+        AddToCartCommand = new RelayCommand(AddToCart);
+        RemoveFromCartCommand = new RelayCommand(RemoveFromCart);
+        IncrementCommand = new RelayCommand(IncrementItem);
+        DecrementCommand = new RelayCommand(DecrementItem);
+        ConfirmOrderCommand = new AsyncRelayCommand(ConfirmOrderAsync, () => Cart.Count > 0);
+        ClearCartCommand = new RelayCommand(ClearCart);
+        RefreshCommand = new AsyncRelayCommand(LoadDataAsync);
+        FilterCategoryCommand = new RelayCommand(FilterCategory);
+    }
+
+    private void FilterCategory(object? param)
+    {
+        if (param is string cat)
+            SelectedCategory = cat;
+    }
+
+    // ── Data ──
+    private List<ProductDto> _allProducts = [];
+
+    public ObservableCollection<ProductDto> Products { get; } = [];
+    public ObservableCollection<CartItem> Cart { get; } = [];
+    public ObservableCollection<string> Categories { get; } = [];
+
+    private string _selectedCategory = "Tutte";
+    public string SelectedCategory
+    {
+        get => _selectedCategory;
+        set { SetField(ref _selectedCategory, value); ApplyFilter(); }
+    }
+
+    private string _searchText = "";
+    public string SearchText
+    {
+        get => _searchText;
+        set { SetField(ref _searchText, value); ApplyFilter(); }
+    }
+
+    private decimal _cartTotal;
+    public decimal CartTotal
+    {
+        get => _cartTotal;
+        set => SetField(ref _cartTotal, value);
+    }
+
+    private int _cartCount;
+    public int CartCount
+    {
+        get => _cartCount;
+        set => SetField(ref _cartCount, value);
+    }
+
+    private int? _lastOrderId;
+    public int? LastOrderId
+    {
+        get => _lastOrderId;
+        set => SetField(ref _lastOrderId, value);
+    }
+
+    private bool _orderConfirmed;
+    public bool OrderConfirmed
+    {
+        get => _orderConfirmed;
+        set => SetField(ref _orderConfirmed, value);
+    }
+
+    // ── Commands ──
+    public ICommand AddToCartCommand { get; }
+    public ICommand RemoveFromCartCommand { get; }
+    public ICommand IncrementCommand { get; }
+    public ICommand DecrementCommand { get; }
+    public ICommand ConfirmOrderCommand { get; }
+    public ICommand ClearCartCommand { get; }
+    public ICommand RefreshCommand { get; }
+    public ICommand FilterCategoryCommand { get; }
+
+    public void Start() => _ = LoadDataAsync();
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            _allProducts = await _api.GetProductsAsync(onlyAvailable: true);
+
+            Categories.Clear();
+            Categories.Add("Tutte");
+            foreach (var cat in _allProducts.Select(p => p.Category ?? "Altro").Distinct().OrderBy(c => c))
+                Categories.Add(cat);
+
+            ApplyFilter();
+        }
+        catch { }
+    }
+
+    private void ApplyFilter()
+    {
+        var search = (SearchText ?? "").ToLowerInvariant();
+        var filtered = _allProducts.Where(p =>
+        {
+            var matchSearch = string.IsNullOrEmpty(search)
+                || (p.Name ?? "").Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                || (p.Description ?? "").Contains(search, StringComparison.CurrentCultureIgnoreCase);
+            var matchCat = SelectedCategory == "Tutte" || (p.Category ?? "Altro") == SelectedCategory;
+            return matchSearch && matchCat;
+        });
+
+        Products.Clear();
+        foreach (var p in filtered)
+            Products.Add(p);
+    }
+
+    private void AddToCart(object? parameter)
+    {
+        if (parameter is not ProductDto product) return;
+        var existing = Cart.FirstOrDefault(c => c.Product.Id == product.Id);
+        if (existing != null)
+            existing.Quantity++;
+        else
+            Cart.Add(new CartItem { Product = product, Quantity = 1 });
+        UpdateCartTotals();
+        OrderConfirmed = false;
+    }
+
+    private void RemoveFromCart(object? parameter)
+    {
+        if (parameter is not CartItem item) return;
+        Cart.Remove(item);
+        UpdateCartTotals();
+    }
+
+    private void IncrementItem(object? parameter)
+    {
+        if (parameter is not CartItem item) return;
+        item.Quantity++;
+        UpdateCartTotals();
+    }
+
+    private void DecrementItem(object? parameter)
+    {
+        if (parameter is not CartItem item) return;
+        if (item.Quantity > 1)
+            item.Quantity--;
+        else
+            Cart.Remove(item);
+        UpdateCartTotals();
+    }
+
+    private void ClearCart(object? parameter)
+    {
+        Cart.Clear();
+        UpdateCartTotals();
+        OrderConfirmed = false;
+    }
+
+    private void UpdateCartTotals()
+    {
+        CartTotal = Cart.Sum(c => c.Total);
+        CartCount = Cart.Sum(c => c.Quantity);
+    }
+
+    private async Task ConfirmOrderAsync()
+    {
+        if (Cart.Count == 0) return;
+        try
+        {
+            var request = new CreateOrderRequest
+            {
+                OrderItems = Cart.Select(c => new CreateOrderItemRequest
+                {
+                    ProductId = c.Product.Id,
+                    Quantity = c.Quantity
+                }).ToList()
+            };
+
+            var order = await _api.CreateOrderAsync(request);
+
+            // Auto-pay (to move into kitchen flow)
+            await _api.PayOrderAsync(order.Id);
+
+            LastOrderId = order.Id;
+            OrderConfirmed = true;
+
+            Cart.Clear();
+            UpdateCartTotals();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Errore nella creazione dell'ordine:\n{ex.Message}", "Errore", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+}
